@@ -17,47 +17,7 @@ const client = new OAuth2Client(CLIENT_ID);
 // // ===========================================
 // // Autenticación Google
 // // ===========================================
-// async function verify(token) {
-//     const ticket = await client.verifyIdToken({
-//         idToken: token,
-//         audience: CLIENT_ID, // Specify the CLIENT_ID of the app that accesses the backend
-//         // Or, if multiple clients access the backend:
-//         //[CLIENT_ID_1, CLIENT_ID_2, CLIENT_ID_3]
-//     });
-//     const payload = ticket.getPayload();
-//     //const userid = payload['sub'];
-//     // If request specified a G Suite domain:
-//     // const domain = payload['hd'];
 
-//     return {
-//         nombre: payload.name,
-//         email: payload.email,
-//         img: payload.picture,
-//         google: true
-//     }
-// }
-
-// app.post('/google', async(req, res) => {
-
-//     var token = req.body.token;
-
-//     var googleUser = await verify(token)
-//         .catch(e => {
-
-//             res.status(403).json({
-//                 ok: false,
-//                 mensaje: 'Token no válido',
-//             });
-
-//         });
-
-//     res.status(200).json({
-//         ok: true,
-//         mensaje: 'ok!!',
-//         googleUser: googleUser
-//     });
-
-// })
 
 var CLIENT_ID = require('../config/config').CLIENT_ID;
 
@@ -106,7 +66,8 @@ app.post('/google', (req, res, next) => {
                         ok: true,
                         usuario: usuario,
                         token: token,
-                        id: usuario._id
+                        id: usuario._id,
+                        menu: obtenerMenu(usuario.role)
                     });
 
                 }
@@ -140,7 +101,8 @@ app.post('/google', (req, res, next) => {
                         ok: true,
                         usuario: usuarioDB,
                         token: token,
-                        id: usuarioDB._id
+                        id: usuarioDB._id,
+                        menu: obtenerMenu(usuarioDB.role)
                     });
 
                 });
@@ -197,7 +159,8 @@ app.post('/', (req, res) => {
             ok: true,
             usuario: usuarioDB,
             token: token,
-            id: usuarioDB._id
+            id: usuarioDB._id,
+            menu: obtenerMenu(usuarioDB.role)
         });
     });
 
@@ -205,6 +168,39 @@ app.post('/', (req, res) => {
 
 });
 
+function obtenerMenu(ROLE) {
+
+    var menu = [{
+            titulo: 'Principal',
+            icono: 'mdi mdi-gauge',
+            submenu: [
+                { titulo: 'Dashboard', url: '/dashboard' },
+                { titulo: 'ProgressBar', url: '/progress' },
+                { titulo: 'Gráficas', url: '/graficas1' },
+                { titulo: 'Promesas', url: '/promesas' },
+                { titulo: 'Rxjs', url: '/rxjs' }
+            ]
+        },
+        {
+            titulo: 'Mantenimientos',
+            icono: 'mdi mdi-folder-lock-open',
+            submenu: [
+                // { titulo: 'Usuarios', url: '/usuarios'},
+                { titulo: 'Hospitales', url: '/hospitales' },
+                { titulo: 'Médicos', url: '/medicos' },
+            ]
+        }
+
+    ];
+
+    if (ROLE === 'ADMIN_ROLE') {
+
+        menu[1].submenu.unshift({ titulo: 'Usuarios', url: '/usuarios' })
+    }
+
+
+    return menu;
+}
 
 
 module.exports = app;
